@@ -1,5 +1,11 @@
 # CHANGELOG — ICTD Risk Register (سجل المخاطر)
 
+## v1.5 — 2026-10-18
+- Removed the names Omar Saleh, Nora Al-Zahrani, Ahmed Al-Rashidi, Khalid Mansour, Sara Al-Otaibi from the register (7 risks: RR-036…RR-041, RR-043):
+  reporter → blank, action owner → «غير محدد».
+- Seed data updated; one-time automatic clean-up of the live `Risks` and `Lists` tabs on the first page load after the update (`cleanup_names_v15`).
+- Header showed "Owner" instead of the owner's name: the owner row in `AllowedUsers` is renamed to Mohamed ElMahdy, and the placeholder "Owner" is never displayed.
+
 ## v1.4 — 2026-10-18
 - Applied **SRU Secure Access Kit v1.4**:
   - Access check in `doGet` (domain + `AllowedUsers` list, `ACCESS_MODE = 'LIST'`); `requireSruUser_()` on every `api()` call.

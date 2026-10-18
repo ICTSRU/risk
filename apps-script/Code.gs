@@ -1,6 +1,6 @@
 /**
  * =====================================================================
- *  ICTD Risk Register v1.4 — built on SRU Secure Access Kit v1.4
+ *  ICTD Risk Register v1.5 — built on SRU Secure Access Kit v1.4
  *  Access: Sulaiman Al Rajhi University Google accounts (@sr.edu.sa) only
  *  ICTD — ITOC
  * ---------------------------------------------------------------------
@@ -15,7 +15,7 @@
 /* ▼▼▼ CONFIG — change per platform ▼▼▼ */
 const APP_NAME       = 'سجل المخاطر';           // Arabic title shown in the page
 const APP_NAME_EN    = 'ICTD Risk Register';        // English name
-const APP_VERSION    = '1.4';
+const APP_VERSION    = '1.5';
 const ALLOWED_DOMAIN = 'sr.edu.sa';
 const FAVICON_URL    = 'https://ictsru.github.io/ITOC/assets/itoc-logo.png';
 
@@ -192,7 +192,7 @@ function setupAccessList() {
     .map(r => [String(r[0]).trim(), r[1], r[2], r[3] === true || String(r[3]).toUpperCase() === 'TRUE', r[4]]);
   const have = kept.map(r => r[0].toLowerCase());
 
-  const seed = OWNER_EMAILS.map(e => [e, 'Owner', 'admin', 'owner'])
+  const seed = OWNER_EMAILS.map(e => [e, e === 'm.elmahdy@sr.edu.sa' ? 'Mohamed ElMahdy' : '', 'admin', 'owner'])
     .concat(typeof DEFAULT_ALLOWED !== 'undefined' ? DEFAULT_ALLOWED : []);
   let added = 0;
   seed.forEach(r => {
@@ -359,7 +359,50 @@ function ss_() {
 }
 
 /** Creates any missing tab (and seeds the 44 risks) automatically — no need to run setup() by hand. */
+/* Names removed from the register (v1.5). Reporter → blank, owner → «غير محدد». */
+const REMOVED_NAMES = ['Omar Saleh', 'Nora Al-Zahrani', 'Ahmed Al-Rashidi', 'Khalid Mansour', 'Sara Al-Otaibi'];
+const UNASSIGNED = 'غير محدد';
+
+/** One-time clean-up of the live sheet (runs once per script, on the first page load after updating). */
+function cleanupNames_() {
+  const props = PropertiesService.getScriptProperties();
+  if (props.getProperty('cleanup_names_v15') === 'done') return;
+  const ss = ss_(), bad = REMOVED_NAMES.map(n => n.toLowerCase());
+  const isBad = v => bad.indexOf(String(v || '').trim().toLowerCase()) !== -1;
+  let changed = 0;
+
+  const risks = ss.getSheetByName(CONFIG.SHEET_RISKS);
+  if (risks && risks.getLastRow() > 1) {
+    const rng = risks.getRange(2, 1, risks.getLastRow() - 1, KEYS.length), v = rng.getValues();
+    const iRep = KEYS.indexOf('reporter'), iOwn = KEYS.indexOf('owner');
+    v.forEach(r => {
+      if (isBad(r[iRep])) { r[iRep] = ''; changed++; }
+      if (isBad(r[iOwn])) { r[iOwn] = UNASSIGNED; changed++; }
+    });
+    rng.setValues(v);
+  }
+  const lists = ss.getSheetByName(CONFIG.SHEET_LISTS);
+  if (lists && lists.getLastRow() > 1) {
+    const n = lists.getLastRow() - 1, v = lists.getRange(2, 1, n, 2).getValues();
+    const col = i => v.map(r => r[i]).filter(x => String(x).trim() && !isBad(x));
+    const a = col(0), b = col(1), m = Math.max(a.length, b.length), out = [];
+    for (let i = 0; i < n; i++) out.push(i < m ? [a[i] || '', b[i] || ''] : ['', '']);
+    lists.getRange(2, 1, n, 2).setValues(out);
+  }
+  // The kit seeds the owner row with the name "Owner" — show the real name instead.
+  const acc = ss.getSheetByName(SHEET_ACCESS);
+  if (acc && acc.getLastRow() > 1) {
+    const rng = acc.getRange(2, 1, acc.getLastRow() - 1, 2), v = rng.getValues();
+    let fixed = false;
+    v.forEach(r => { if (String(r[0]).trim().toLowerCase() === 'm.elmahdy@sr.edu.sa' && String(r[1]).trim() === 'Owner') { r[1] = 'Mohamed ElMahdy'; fixed = true; } });
+    if (fixed) { rng.setValues(v); CacheService.getScriptCache().removeAll(['acl_v1', 'dir_v1']); }
+  }
+  props.setProperty('cleanup_names_v15', 'done');
+  console.log('cleanupNames_: ' + changed + ' cells cleared.');
+}
+
 function ensureSetup_() {
+  try { cleanupNames_(); } catch (e) { console.error('cleanupNames_ failed: ' + e); }
   const ss = ss_();
   const need = [CONFIG.SHEET_RISKS, CONFIG.SHEET_AUDIT, CONFIG.SHEET_LISTS, SHEET_ACCESS]
     .some(n => !ss.getSheetByName(n));
@@ -446,7 +489,7 @@ function userDirectory_() {
 function userInfo_(email) {
   const d = userDirectory_()[email] || {};
   const owner = OWNER_EMAILS.map(x => x.toLowerCase()).indexOf(email) !== -1;
-  const name = d.name || email.split('@')[0].split(/[._-]+/).filter(Boolean)
+  const name = (d.name && d.name !== 'Owner' ? d.name : '') || email.split('@')[0].split(/[._-]+/).filter(Boolean)
     .map(p => p.charAt(0).toUpperCase() + p.slice(1)).join(' ');
   return { email: email, name: name, isAdmin: owner || d.role === 'admin' };
 }
@@ -1314,7 +1357,7 @@ const SEED = [
  {
   "id": "RR-036",
   "date": "2026",
-  "reporter": "Sara Al-Otaibi",
+  "reporter": "",
   "reporterEmail": "",
   "receiver": "Mahdy",
   "risk": "عدم امتثال اتفاقيات مشاركة البيانات مع جهات خارجية (مثل البنك السعودي للتنمية) لمتطلبات نظام حماية البيانات الشخصية (PDPL).",
@@ -1325,7 +1368,7 @@ const SEED = [
   "preventive": "مراجعة دورية لجميع اتفاقيات مشاركة البيانات ومستوى الخدمة (SLA) في ضوء PDPL وNDMO وNCA ECC، وتحديث بند حوكمة البيانات في العقود الجديدة.",
   "treatment": "التخفيف",
   "contingency": "تعليق مشاركة البيانات مع الجهة المخالفة فورًا وإبلاغ SDAIA خلال المهلة النظامية عند وقوع خرق.",
-  "owner": "Sara Al-Otaibi",
+  "owner": "غير محدد",
   "status": "مفتوح",
   "reviewDate": "",
   "createdBy": "import:Risk_Register_Arabic_2026",
@@ -1336,7 +1379,7 @@ const SEED = [
  {
   "id": "RR-037",
   "date": "2026",
-  "reporter": "Khalid Mansour",
+  "reporter": "",
   "reporterEmail": "",
   "receiver": "Mahdy",
   "risk": "هجوم فدية (Ransomware) يستهدف الأنظمة والخدمات السحابية المستضاف عليها بيانات الطلاب والموظفين.",
@@ -1347,7 +1390,7 @@ const SEED = [
   "preventive": "تطبيق حل EDR/XDR على جميع الأجهزة، وتجزئة الشبكة (Network Segmentation)، واختبار استعادة النسخ الاحتياطية بشكل ربع سنوي وفق إطار NCA ECC.",
   "treatment": "التخفيف",
   "contingency": "عزل الأنظمة المصابة فورًا، وتفعيل خطة استمرارية الأعمال (BCP) والاستعادة من نسخ احتياطية غير متصلة بالشبكة (Air-gapped).",
-  "owner": "Khalid Mansour",
+  "owner": "غير محدد",
   "status": "مفتوح",
   "reviewDate": "",
   "createdBy": "import:Risk_Register_Arabic_2026",
@@ -1358,7 +1401,7 @@ const SEED = [
  {
   "id": "RR-038",
   "date": "2026",
-  "reporter": "Ahmed Al-Rashidi",
+  "reporter": "",
   "reporterEmail": "",
   "receiver": "Mahdy",
   "risk": "أخطاء في إعدادات الأمان (Misconfiguration) أثناء مرحلة ترحيل الأنظمة إلى البيئة السحابية.",
@@ -1369,7 +1412,7 @@ const SEED = [
   "preventive": "اعتماد قائمة تحقق أمنية (Security Baseline Checklist) لكل مرحلة ترحيل، ومراجعة مستقلة للإعدادات قبل التفعيل النهائي (Go-Live).",
   "treatment": "التخفيف",
   "contingency": "التراجع الفوري (Rollback) إلى البيئة السابقة وإغلاق أي منفذ أو خدمة مكشوفة عن طريق الخطأ.",
-  "owner": "Ahmed Al-Rashidi",
+  "owner": "غير محدد",
   "status": "مفتوح",
   "reviewDate": "",
   "createdBy": "import:Risk_Register_Arabic_2026",
@@ -1380,7 +1423,7 @@ const SEED = [
  {
   "id": "RR-039",
   "date": "2026",
-  "reporter": "Khalid Mansour",
+  "reporter": "",
   "reporterEmail": "",
   "receiver": "Mahdy",
   "risk": "اختراق حسابات المستخدمين نتيجة ضعف أو غياب المصادقة متعددة العوامل (MFA) على بعض الأنظمة الحرجة.",
@@ -1391,7 +1434,7 @@ const SEED = [
   "preventive": "فرض تفعيل MFA على جميع الحسابات الإدارية والحرجة، ومراجعة سياسات كلمات المرور بشكل دوري.",
   "treatment": "التخفيف",
   "contingency": "تعطيل الحساب المخترق فوراً، وإعادة تعيين بيانات الاعتماد، ومراجعة سجلات الدخول (Audit Logs) لتحديد نطاق الاختراق.",
-  "owner": "Khalid Mansour",
+  "owner": "غير محدد",
   "status": "مفتوح",
   "reviewDate": "",
   "createdBy": "import:Risk_Register_Arabic_2026",
@@ -1402,7 +1445,7 @@ const SEED = [
  {
   "id": "RR-040",
   "date": "2026",
-  "reporter": "Nora Al-Zahrani",
+  "reporter": "",
   "reporterEmail": "",
   "receiver": "Mahdy",
   "risk": "استخدام غير مصرح به أو غير خاضع للرقابة لأدوات الذكاء الاصطناعي التوليدي (Shadow AI) من قبل الموظفين والطلاب.",
@@ -1413,7 +1456,7 @@ const SEED = [
   "preventive": "إصدار سياسة استخدام مقبول للذكاء الاصطناعي، وتوعية الموظفين والطلاب، وتوفير أدوات ذكاء اصطناعي معتمدة ومؤمنة داخليًا.",
   "treatment": "التخفيف",
   "contingency": "حظر الوصول إلى الأدوات غير المعتمدة عبر جدار الحماية، والتحقيق في أي حادثة تسرّب بيانات مبلغ عنها.",
-  "owner": "Nora Al-Zahrani",
+  "owner": "غير محدد",
   "status": "مفتوح",
   "reviewDate": "",
   "createdBy": "import:Risk_Register_Arabic_2026",
@@ -1424,7 +1467,7 @@ const SEED = [
  {
   "id": "RR-041",
   "date": "2026",
-  "reporter": "Omar Saleh",
+  "reporter": "",
   "reporterEmail": "",
   "receiver": "Mahdy",
   "risk": "ضغط غير متوقع على البنية التحتية للشبكة (Wi-Fi والنطاق الترددي) نتيجة التوسع في رقمنة خدمات الطلاب.",
@@ -1435,7 +1478,7 @@ const SEED = [
   "preventive": "دراسة سعة الشبكة دوريًا، وتوسيع النطاق الترددي وتحديث نقاط الوصول اللاسلكي قبل بدء كل فصل دراسي.",
   "treatment": "التخفيف",
   "contingency": "إعادة توجيه الأحمال الحرجة وتفعيل نطاق ترددي احتياطي، وتمديد فترات إتاحة الخدمات المتأثرة للطلاب.",
-  "owner": "Omar Saleh",
+  "owner": "غير محدد",
   "status": "مفتوح",
   "reviewDate": "",
   "createdBy": "import:Risk_Register_Arabic_2026",
@@ -1468,7 +1511,7 @@ const SEED = [
  {
   "id": "RR-043",
   "date": "2026",
-  "reporter": "Sara Al-Otaibi",
+  "reporter": "",
   "reporterEmail": "",
   "receiver": "Mahdy",
   "risk": "عدم اكتمال أدلة الامتثال التقني المطلوبة لإعادة الاعتماد المؤسسي (NCAAA) في الموعد المحدد ضمن المعيار 6.2.",
@@ -1479,7 +1522,7 @@ const SEED = [
   "preventive": "إعداد سجل فجوات (Gap Register) وخطة زمنية لتجهيز كل عنصر من عناصر الأدلة العشرة قبل موعد التقديم بشهرين على الأقل.",
   "treatment": "التخفيف",
   "contingency": "تشكيل فريق عمل مؤقت لتسريع تجميع الأدلة الناقصة بالتنسيق مع عمادة الجودة.",
-  "owner": "Sara Al-Otaibi",
+  "owner": "غير محدد",
   "status": "مفتوح",
   "reviewDate": "",
   "createdBy": "import:Risk_Register_Arabic_2026",
