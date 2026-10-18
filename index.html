@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>سجل المخاطر | ITOC</title>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+:root{--sru-purple:#501e8c;--sru-purple-dark:#3a1464;--sru-purple-light:#f0ebf8;--sru-blue:#0a6eaa;--sru-muted:#6b5a80;--sru-ink:#241436}
+*{box-sizing:border-box}
+body{margin:0;font-family:'Cairo',Tahoma,Arial,sans-serif;color:var(--sru-ink);min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px 16px;
+  background:radial-gradient(1200px 600px at 80% -10%,#5b2a99 0%,transparent 60%),linear-gradient(160deg,#2a0f4a,#3a1464 55%,#0a4f7a)}
+.version-badge{position:fixed;top:8px;left:8px;background:var(--sru-purple-dark);color:#fff;font-weight:800;font-size:12px;padding:2px 10px;border-radius:999px;direction:ltr;box-shadow:0 2px 6px rgba(0,0,0,.2)}
+.card{background:#fff;border-radius:14px;max-width:440px;width:100%;padding:28px 26px;text-align:center;box-shadow:0 30px 60px rgba(0,0,0,.35)}
+.logo img{height:60px;max-width:200px;object-fit:contain}
+.itoc-word{font-weight:900;font-size:26px;letter-spacing:1px;color:#1e3a5f;direction:ltr}
+.itoc-word small{display:block;font-size:11px;letter-spacing:2px;color:#0d9488;font-weight:800}
+h1{font-size:22px;font-weight:900;color:var(--sru-purple-dark);margin:10px 0 2px}
+.sub{color:var(--sru-muted);margin:0 0 16px}
+.note{background:var(--sru-purple-light);border-radius:8px;padding:12px 14px;text-align:right;font-size:13.5px;line-height:1.8;margin-bottom:20px}
+.note b{color:var(--sru-purple)}
+.sru-en{unicode-bidi:isolate;direction:ltr;display:inline-block}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:10px;width:100%;background:var(--sru-purple);color:#fff;text-decoration:none;font-weight:800;font-size:15px;padding:12px 16px;border-radius:4px;transition:background .15s,transform .15s}
+.btn:hover{background:var(--sru-purple-dark);transform:translateY(-1px)}
+.btn svg{width:20px;height:20px;background:#fff;border-radius:50%;padding:2px}
+.foot{margin-top:16px;font-size:12px;color:var(--sru-muted)}
+.foot a{color:var(--sru-blue);text-decoration:none}
+</style>
+</head>
+<body>
+<div class="version-badge">v1.1</div>
+<main class="card">
+  <div class="logo"><img src="assets/itoc-logo.png" alt="ITOC" onerror="this.parentNode.innerHTML='<div class=&quot;itoc-word&quot;>ITOC<small>IT OPERATIONS CENTER</small></div>'"></div>
+  <h1>سجل المخاطر</h1>
+  <p class="sub">الإدارة التنفيذية للاتصالات وتقنية المعلومات</p>
+  <div class="note">
+    يتم تسجيل الدخول باستخدام <b>البريد الإلكتروني الجامعي</b> فقط (<span class="sru-en">name@sr.edu.sa</span>).<br>
+    بعد الضغط على الزر ستنتقل إلى صفحة تسجيل الدخول من Google — اختر حسابك الجامعي، ثم يفتح السجل مباشرة.
+  </div>
+  <a class="btn" id="go" href="https://script.google.com/a/macros/sr.edu.sa/s/AKfycby5E2RGOAn6vtxyLvuj3R0UZwFO94brbEtjuKijk8GL1FJLM4Re4hdGFB7EW183QGEI/exec">
+    <svg viewBox="0 0 48 48" aria-hidden="true"><path fill="#EA4335" d="M24 9.5c3.5 0 6.6 1.2 9 3.5l6.7-6.7C35.6 2.4 30.2 0 24 0 14.6 0 6.6 5.4 2.7 13.3l7.8 6C12.4 13.6 17.7 9.5 24 9.5z"/><path fill="#4285F4" d="M46.5 24.5c0-1.6-.1-3.1-.4-4.5H24v9h12.7c-.6 3-2.3 5.5-4.8 7.2l7.5 5.8c4.4-4 7.1-10 7.1-17.5z"/><path fill="#FBBC05" d="M10.5 28.7c-.5-1.4-.8-3-.8-4.7s.3-3.3.8-4.7l-7.8-6C1 16.6 0 20.2 0 24s1 7.4 2.7 10.7l7.8-6z"/><path fill="#34A853" d="M24 48c6.5 0 11.9-2.1 15.9-5.8l-7.5-5.8c-2.1 1.4-4.9 2.3-8.4 2.3-6.3 0-11.6-4.1-13.5-9.8l-7.8 6C6.6 42.6 14.6 48 24 48z"/></svg>
+    تسجيل الدخول بالحساب الجامعي
+  </a>
+  <div class="foot">جامعة سليمان الراجحي · <a href="https://ictsru.github.io/ITOC/#forms" target="_blank" rel="noopener"><span class="sru-en">ITOC Forms Hub</span></a></div>
+</main>
+</body>
+</html>

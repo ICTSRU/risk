@@ -1,0 +1,705 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>سجل المخاطر | ICTD Risk Register</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+<script src="https://unpkg.com/lucide@0.468.0/dist/umd/lucide.min.js"></script>
+<base target="_top">
+<style>
+:root{
+  --sru-purple:#501e8c;--sru-purple-dark:#3a1464;--sru-purple-light:#f0ebf8;
+  --sru-blue:#0a6eaa;--sru-blue-light:#e6f3fa;
+  --sru-bg:#f7f5fb;--sru-border:rgba(80,30,140,.12);--sru-ink:#241436;--sru-muted:#6b5a80;--sru-radius:4px;
+  --p-vlow:#fde68a;--p-low:#ca8a04;--p-med:#ea580c;--p-high:#dc2626;--p-vhigh:#991b1b;
+}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{font-family:'Cairo',Tahoma,Arial,sans-serif;background:var(--sru-bg);color:var(--sru-ink);font-size:14px;line-height:1.6;overflow-x:hidden}
+.sru-en{unicode-bidi:isolate;direction:ltr;display:inline-block}
+button,input,select,textarea{font-family:inherit;font-size:14px}
+[hidden]{display:none!important}
+.container{max-width:1280px;margin:0 auto;padding:0 16px}
+svg.lucide{width:18px;height:18px;stroke-width:2;vertical-align:middle}
+
+/* version badge */
+.version-badge{position:fixed;top:8px;left:8px;z-index:200;background:var(--sru-purple-dark);color:#fff;font-weight:800;font-size:12px;padding:2px 10px;border-radius:999px;direction:ltr;box-shadow:0 2px 6px rgba(0,0,0,.2)}
+
+/* header band */
+.brand-band{background:#fff;border-bottom:1px solid var(--sru-border)}
+.brand-band .container{display:flex;align-items:center;justify-content:space-between;min-height:84px;gap:16px}
+.brand-band img{height:60px;max-width:46vw;object-fit:contain}
+.logo-fallback{font-weight:900;color:var(--sru-purple);font-size:15px;line-height:1.3}
+.sru-topbar{background:linear-gradient(180deg,#43186f,var(--sru-purple-dark));color:#fff}
+.sru-topbar .container{display:flex;align-items:center;justify-content:space-between;gap:12px;min-height:58px;flex-wrap:wrap;padding-top:6px;padding-bottom:6px}
+.sru-title{margin:0;font-size:20px;font-weight:900;display:flex;align-items:center;gap:8px}
+.sru-title small{font-weight:600;font-size:12px;opacity:.8}
+.user-chip{display:flex;align-items:center;gap:8px;background:rgba(255,255,255,.12);border-radius:999px;padding:4px 6px 4px 12px;font-size:13px}
+.user-chip .avatar{width:30px;height:30px;border-radius:50%;background:#fff;color:var(--sru-purple);display:grid;place-items:center;font-weight:900}
+.user-chip button{background:transparent;border:1px solid rgba(255,255,255,.5);color:#fff;border-radius:999px;padding:2px 10px;cursor:pointer}
+.user-chip button:hover{background:rgba(255,255,255,.15)}
+.sru-navbar{background:var(--sru-purple)}
+.sru-navbar .container{display:flex;gap:4px;overflow-x:auto}
+.sru-nav-item{background:none;border:0;color:#e9defa;padding:12px 16px;cursor:pointer;font-weight:700;display:flex;align-items:center;gap:6px;border-bottom:3px solid transparent;white-space:nowrap}
+.sru-nav-item:hover{color:#fff;background:rgba(255,255,255,.06)}
+.sru-nav-item.active{color:#fff;border-bottom-color:#fff}
+.sru-diag{height:5px;background:repeating-linear-gradient(-45deg,var(--sru-blue) 0 12px,#0c84cc 12px 24px)}
+
+main{padding:24px 0 40px}
+.page-head{display:flex;align-items:flex-end;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:16px}
+.page-head h2{margin:0;font-size:22px;font-weight:900;color:var(--sru-purple-dark)}
+.page-head p{margin:2px 0 0;color:var(--sru-muted)}
+.sru-card{background:#fff;border:1px solid var(--sru-border);border-radius:8px;padding:18px;box-shadow:0 1px 2px rgba(58,20,100,.04)}
+.sru-card h3{margin:0 0 12px;font-size:16px;font-weight:900;color:var(--sru-purple-dark);display:flex;align-items:center;gap:8px}
+
+.sru-btn{display:inline-flex;align-items:center;gap:6px;border-radius:var(--sru-radius);padding:8px 16px;font-weight:700;cursor:pointer;border:1px solid var(--sru-purple);background:var(--sru-purple);color:#fff;transition:transform .12s,box-shadow .12s,background .12s}
+.sru-btn:hover{background:var(--sru-purple-dark);transform:translateY(-1px);box-shadow:0 3px 8px rgba(80,30,140,.25)}
+.sru-btn.secondary{background:#fff;color:var(--sru-purple)}
+.sru-btn.secondary:hover{background:var(--sru-purple-light)}
+.sru-btn.danger{background:#fff;color:#b91c1c;border-color:#b91c1c}
+.sru-btn:disabled{opacity:.6;cursor:wait;transform:none}
+.icon-btn{border:1px solid var(--sru-border);background:#fff;border-radius:var(--sru-radius);width:32px;height:32px;display:inline-grid;place-items:center;cursor:pointer;color:var(--sru-purple)}
+.icon-btn:hover{background:var(--sru-purple-light)}
+.icon-btn.del{color:#b91c1c}
+
+/* stats */
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px;margin-bottom:16px}
+.stat{background:#fff;border:1px solid var(--sru-border);border-top:4px solid var(--sru-purple);border-radius:8px;padding:14px;display:flex;align-items:center;gap:12px;transition:transform .12s,box-shadow .12s}
+.stat:hover{transform:translateY(-2px);box-shadow:0 6px 14px rgba(58,20,100,.08)}
+.stat .ic{width:42px;height:42px;border-radius:10px;display:grid;place-items:center;background:var(--sru-purple-light);color:var(--sru-purple)}
+.stat .ic svg{width:22px;height:22px}
+.stat b{display:block;font-size:26px;font-weight:900;line-height:1.1}
+.stat span{color:var(--sru-muted);font-size:13px;font-weight:700}
+.dash-grid{display:grid;grid-template-columns:minmax(0,1.25fr) minmax(0,1fr);gap:16px}
+@media (max-width:900px){.dash-grid{grid-template-columns:1fr}}
+
+/* heat map */
+.hm-wrap{display:flex;align-items:stretch;gap:6px}
+.hm-side{width:34px;flex:0 0 34px;position:relative}
+.hm-side span{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%) rotate(-90deg);white-space:nowrap}
+.axis-pill{display:inline-block;color:#fff;font-weight:800;font-size:12px;padding:3px 14px;border-radius:999px}
+.axis-pill.lk{background:var(--sru-blue)}
+.axis-pill.im{background:var(--sru-purple)}
+.hm-main{flex:1;min-width:0}
+.hm-top{text-align:center;margin:0 0 6px;padding-right:86px}
+.hm{display:grid;grid-template-columns:86px repeat(5,minmax(0,1fr));gap:4px}
+.hm .lbl{font-size:11.5px;font-weight:800;color:var(--sru-muted);display:flex;align-items:center;justify-content:center;text-align:center;line-height:1.3;padding:2px}
+.hm .cell{aspect-ratio:1.5/1;min-height:40px;border-radius:6px;display:grid;place-items:center;font-weight:900;font-size:18px;cursor:pointer;transition:transform .1s,box-shadow .1s;border:2px solid transparent}
+.hm .cell:hover{transform:scale(1.04);box-shadow:0 4px 10px rgba(0,0,0,.18)}
+.hm .cell.zero{opacity:.45;font-size:13px}
+.hm .cell.sel{border-color:var(--sru-ink)}
+@media (max-width:600px){
+  .hm{grid-template-columns:56px repeat(5,minmax(0,1fr));gap:3px}
+  .hm .cell{aspect-ratio:auto;min-height:0;height:38px;font-size:15px}
+  .hm .lbl{font-size:10px}
+  .hm-top{padding-right:56px}
+  .brand-band img{height:44px}
+  .logo-fallback{font-size:11.5px}
+  .sru-card{padding:14px}
+}
+.legend{display:flex;flex-wrap:wrap;gap:10px;margin-top:12px;font-size:12px;font-weight:700;color:var(--sru-muted)}
+.legend i{display:inline-block;width:14px;height:14px;border-radius:3px;vertical-align:-2px;margin-left:4px}
+
+.bars .row{display:grid;grid-template-columns:120px 1fr 34px;gap:8px;align-items:center;margin:6px 0;font-size:13px}
+.bars .row .name{font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.bars .track{background:var(--sru-purple-light);border-radius:999px;height:12px;overflow:hidden}
+.bars .fill{height:100%;background:linear-gradient(90deg,var(--sru-purple),#7b46c0);border-radius:999px}
+.bars .row b{text-align:left}
+
+/* priority badges */
+.badge{display:inline-block;font-weight:800;font-size:12px;padding:2px 10px;border-radius:999px;white-space:nowrap}
+.p-vlow{background:var(--p-vlow);color:#713f12}
+.p-low{background:var(--p-low);color:#fff}
+.p-med{background:var(--p-med);color:#fff}
+.p-high{background:var(--p-high);color:#fff}
+.p-vhigh{background:var(--p-vhigh);color:#fff}
+.lvl{font-weight:700;font-size:12.5px;white-space:nowrap}
+.st{display:inline-block;font-size:12px;font-weight:800;padding:2px 10px;border-radius:var(--sru-radius);border:1px solid;white-space:nowrap}
+.st-open{color:#b45309;border-color:#f59e0b;background:#fffbeb}
+.st-prog{color:var(--sru-blue);border-color:var(--sru-blue);background:var(--sru-blue-light)}
+.st-watch{color:var(--sru-purple);border-color:var(--sru-purple);background:var(--sru-purple-light)}
+.st-closed{color:#475569;border-color:#94a3b8;background:#f1f5f9}
+
+/* register */
+.toolbar{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-bottom:12px}
+.toolbar .search{flex:1 1 240px;position:relative}
+.toolbar .search input{width:100%;padding-right:34px}
+.toolbar .search svg{position:absolute;right:10px;top:50%;transform:translateY(-50%);color:var(--sru-muted)}
+.sru-field input,.sru-field select,.sru-field textarea,.toolbar input,.toolbar select{border:1px solid #cfc3e0;border-radius:var(--sru-radius);padding:8px 10px;background:#fff;color:var(--sru-ink);min-width:0}
+.toolbar select{flex:0 1 160px}
+input:focus,select:focus,textarea:focus{outline:2px solid rgba(80,30,140,.35);outline-offset:0;border-color:var(--sru-purple)}
+.filter-note{background:var(--sru-blue-light);color:var(--sru-blue);border-radius:var(--sru-radius);padding:6px 12px;font-weight:700;font-size:13px;display:flex;align-items:center;gap:8px;margin-bottom:10px}
+.filter-note button{background:none;border:0;color:inherit;text-decoration:underline;cursor:pointer;font-weight:800}
+.table-wrap{overflow:auto;max-height:68vh;border:1px solid var(--sru-border);border-radius:8px;background:#fff}
+table{border-collapse:collapse;width:100%;min-width:980px}
+thead th{position:sticky;top:0;background:var(--sru-purple);color:#fff;font-weight:800;text-align:right;padding:10px;font-size:13px;white-space:nowrap;cursor:pointer;user-select:none;z-index:1}
+thead th.nosort{cursor:default}
+thead th .arr{opacity:.6;font-size:11px;margin-right:4px}
+tbody td{padding:9px 10px;border-bottom:1px solid #eee7f6;vertical-align:top}
+tbody tr:nth-child(even){background:#fbf9fd}
+tbody tr:hover{background:var(--sru-purple-light)}
+td.risk-cell{min-width:300px;max-width:440px}
+td.risk-cell .t{font-weight:700;cursor:pointer}
+td.risk-cell .t:hover{color:var(--sru-purple)}
+td.risk-cell .s{color:var(--sru-muted);font-size:12.5px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+td.id{font-weight:800;color:var(--sru-purple);white-space:nowrap;direction:ltr;text-align:right}
+td.acts{white-space:nowrap}
+.count-line{color:var(--sru-muted);font-weight:700;margin:8px 2px 0;font-size:13px}
+.empty{padding:40px;text-align:center;color:var(--sru-muted)}
+.empty svg{width:40px;height:40px;opacity:.5}
+
+/* form */
+.form-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px 18px}
+.form-grid .full{grid-column:1/-1}
+@media (max-width:700px){.form-grid{grid-template-columns:1fr}}
+.sru-field label{display:block;font-weight:900;margin-bottom:4px;color:var(--sru-purple-dark)}
+.sru-field label .req{color:#b91c1c}
+.sru-field input,.sru-field select,.sru-field textarea{width:100%}
+.sru-field textarea{min-height:76px;resize:vertical}
+.sru-field input[readonly]{background:#f3eff9;color:var(--sru-muted)}
+.sru-field .hint{font-size:12px;color:var(--sru-muted);margin-top:3px}
+.prio-box{display:flex;align-items:center;gap:10px;min-height:40px;padding:6px 10px;border:1px dashed #cfc3e0;border-radius:var(--sru-radius);background:#fcfbfe}
+.form-section{grid-column:1/-1;font-weight:900;color:var(--sru-blue);border-bottom:2px solid var(--sru-blue-light);padding-bottom:4px;margin-top:6px;display:flex;align-items:center;gap:6px}
+.form-actions{display:flex;gap:10px;justify-content:flex-start;margin-top:18px;flex-wrap:wrap}
+
+/* modal */
+.modal-bg{position:fixed;inset:0;background:rgba(36,20,54,.55);z-index:300;display:flex;align-items:flex-start;justify-content:center;padding:40px 16px;overflow:auto}
+.modal{background:#fff;border-radius:10px;max-width:760px;width:100%;box-shadow:0 20px 50px rgba(0,0,0,.3)}
+.modal-head{background:var(--sru-purple);color:#fff;padding:14px 18px;border-radius:10px 10px 0 0;display:flex;justify-content:space-between;align-items:center;gap:10px}
+.modal-head h3{margin:0;font-size:16px;font-weight:900}
+.modal-head button{background:none;border:0;color:#fff;cursor:pointer}
+.modal-body{padding:18px}
+.dl{display:grid;grid-template-columns:170px 1fr;gap:8px 14px}
+.dl dt{font-weight:900;color:var(--sru-purple-dark)}
+.dl dd{margin:0;white-space:pre-wrap}
+@media (max-width:600px){.dl{grid-template-columns:1fr}.dl dd{margin-bottom:6px}}
+
+/* banner + loader */
+.banner{position:fixed;top:18px;left:50%;transform:translate(-50%,-20px);opacity:0;z-index:400;background:#fff;border:2px solid #16a34a;color:#14532d;border-radius:10px;padding:14px 22px;font-weight:900;font-size:16px;display:flex;align-items:center;gap:10px;box-shadow:0 12px 30px rgba(0,0,0,.18);transition:all .25s;pointer-events:none;max-width:calc(100vw - 32px)}
+.banner.show{opacity:1;transform:translate(-50%,0)}
+.banner.err{border-color:#b91c1c;color:#7f1d1d}
+.banner svg{width:26px;height:26px}
+.loader{position:fixed;inset:0;background:rgba(247,245,251,.7);z-index:350;display:grid;place-items:center}
+.spin{width:44px;height:44px;border:4px solid var(--sru-purple-light);border-top-color:var(--sru-purple);border-radius:50%;animation:sp 0.8s linear infinite}
+@keyframes sp{to{transform:rotate(360deg)}}
+
+/* ITOC sign-in */
+#signin{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px 16px;background:radial-gradient(1200px 600px at 80% -10%,#5b2a99 0%,transparent 60%),linear-gradient(160deg,#2a0f4a,#3a1464 55%,#0a4f7a)}
+.si-card{background:#fff;border-radius:14px;max-width:440px;width:100%;padding:28px 26px;text-align:center;box-shadow:0 30px 60px rgba(0,0,0,.35)}
+.si-logos{display:flex;justify-content:center;align-items:center;gap:14px;margin-bottom:8px;min-height:56px}
+.si-logos img{height:56px;max-width:180px;object-fit:contain}
+.itoc-word{font-weight:900;font-size:26px;letter-spacing:1px;color:#1e3a5f;direction:ltr}
+.itoc-word small{display:block;font-size:11px;letter-spacing:2px;color:#0d9488;font-weight:800}
+.si-card h1{font-size:21px;font-weight:900;color:var(--sru-purple-dark);margin:10px 0 2px}
+.si-card .sub{color:var(--sru-muted);margin:0 0 16px}
+.si-note{background:var(--sru-purple-light);border-radius:8px;padding:12px;text-align:right;font-size:13px;margin-bottom:18px}
+.si-note b{color:var(--sru-purple)}
+#gbtn{display:flex;justify-content:center;min-height:44px}
+.si-err{color:#b91c1c;font-weight:800;margin-top:12px;min-height:22px}
+.si-foot{margin-top:16px;font-size:12px;color:var(--sru-muted)}
+
+footer{background:#fff;border-top:1px solid var(--sru-border);padding:14px 0}
+footer .container{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;font-size:12.5px;color:var(--sru-muted)}
+footer img{height:38px}
+footer a.itoc{display:flex;align-items:center;text-decoration:none;color:#1e3a5f;font-weight:900}
+
+@media print{
+  .no-print,.sru-navbar,.toolbar,.version-badge,.user-chip,td.acts,th.acts,footer a.itoc{display:none!important}
+  body{background:#fff}
+  .table-wrap{max-height:none;overflow:visible;border:0}
+  table{min-width:0;font-size:11px}
+  thead th{position:static;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  .badge,.st{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  @page{size:A4 landscape;margin:12mm}
+}
+</style>
+</head>
+<body>
+<div class="version-badge" title="Version">v1.1</div>
+
+<!-- ═════════ ITOC sign-in screen ═════════ -->
+<section id="signin">
+  <div class="si-card">
+    <div class="si-logos">
+      <img id="siItoc" src="https://ictsru.github.io/ICTD/risk-register/assets/itoc-logo.png" alt="ITOC" onerror="this.replaceWith(Object.assign(document.createElement('div'),{className:'itoc-word',innerHTML:'ITOC<small>IT OPERATIONS CENTER</small>'}))">
+    </div>
+    <h1>سجل المخاطر</h1>
+    <p class="sub">الإدارة التنفيذية للاتصالات وتقنية المعلومات</p>
+    <div class="si-note">
+      الدخول متاح لحسابات <b>البريد الإلكتروني الجامعي</b> فقط
+      (<span class="sru-en">name@sr.edu.sa</span>).
+    </div>
+    <div id="siWait" style="display:flex;align-items:center;justify-content:center;gap:10px;color:var(--sru-muted);font-weight:700"><div class="spin" style="width:26px;height:26px;border-width:3px"></div> جارٍ التحقق من الحساب…</div>
+    <div class="si-err" id="siErr"></div>
+    <a id="siSwitch" class="sru-btn secondary" hidden style="margin-top:6px;text-decoration:none">تسجيل الدخول بحساب جامعي آخر</a>
+    <div class="si-foot">جامعة سليمان الراجحي · <span class="sru-en">IT Operations Center</span></div>
+  </div>
+</section>
+
+<!-- ═════════ App ═════════ -->
+<div id="app" hidden>
+  <div class="brand-band">
+    <div class="container">
+      <img src="https://ictsru.github.io/ICTD/risk-register/assets/sru-logo.png" alt="جامعة سليمان الراجحي" onerror="this.outerHTML='<div class=&quot;logo-fallback&quot;>جامعة سليمان الراجحي<br><span class=&quot;sru-en&quot;>Sulaiman Al Rajhi University</span></div>'">
+      <img src="https://ictsru.github.io/ICTD/risk-register/assets/ictd-logo.png" alt="ICTD" onerror="this.outerHTML='<div class=&quot;logo-fallback&quot; style=&quot;text-align:left&quot;>الإدارة التنفيذية للاتصالات وتقنية المعلومات<br><span class=&quot;sru-en&quot;>Executive Directorate of Communications &amp; IT</span></div>'">
+    </div>
+  </div>
+  <div class="sru-topbar">
+    <div class="container">
+      <h1 class="sru-title"><i data-lucide="shield-alert"></i> سجل المخاطر <small>ICTD Risk Register</small></h1>
+      <div class="user-chip">
+        <div class="avatar" id="uAvatar">؟</div>
+        <div><div id="uName" style="font-weight:800"></div><div id="uEmail" class="sru-en" style="font-size:11.5px;opacity:.85"></div></div>
+        <button type="button" id="btnOut" title="تسجيل الدخول بحساب آخر"><i data-lucide="repeat" style="width:14px;height:14px"></i> تبديل الحساب</button>
+      </div>
+    </div>
+  </div>
+  <nav class="sru-navbar no-print">
+    <div class="container">
+      <button class="sru-nav-item active" data-view="dash"><i data-lucide="layout-dashboard"></i> لوحة المؤشرات</button>
+      <button class="sru-nav-item" data-view="reg"><i data-lucide="table-2"></i> سجل المخاطر</button>
+      <button class="sru-nav-item" data-view="form"><i data-lucide="plus-circle"></i> تسجيل خطر جديد</button>
+    </div>
+  </nav>
+  <div class="sru-diag"></div>
+
+  <main class="container">
+    <!-- Dashboard -->
+    <section id="v-dash">
+      <div class="page-head">
+        <div><h2>لوحة مؤشرات المخاطر</h2><p>ملخص المخاطر المسجلة وتوزيعها حسب الأولوية والمسؤول</p></div>
+        <button class="sru-btn secondary no-print" id="btnRefresh"><i data-lucide="refresh-cw"></i> تحديث البيانات</button>
+      </div>
+      <div class="stats" id="stats"></div>
+      <div class="dash-grid">
+        <div class="sru-card">
+          <h3><i data-lucide="grid-3x3"></i> مصفوفة المخاطر (الاحتمالية × الأثر)</h3>
+          <div class="hm-top"><span class="axis-pill im">الأثر ←</span></div>
+          <div class="hm-wrap">
+            <div class="hm-side"><span class="axis-pill lk">الاحتمالية ←</span></div>
+            <div class="hm-main"><div class="hm" id="heatmap"></div></div>
+          </div>
+          <div class="legend" id="legend"></div>
+          <div class="hint" style="font-size:12px;color:var(--sru-muted);margin-top:6px">اضغط على أي خلية لعرض المخاطر المطابقة في السجل.</div>
+        </div>
+        <div style="display:grid;gap:16px;align-content:start">
+          <div class="sru-card"><h3><i data-lucide="users"></i> المخاطر حسب مسؤول الإجراء</h3><div class="bars" id="byOwner"></div></div>
+          <div class="sru-card"><h3><i data-lucide="activity"></i> المخاطر حسب الحالة</h3><div class="bars" id="byStatus"></div></div>
+          <div class="sru-card"><h3><i data-lucide="calendar"></i> المخاطر حسب سنة التسجيل</h3><div class="bars" id="byYear"></div></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Register -->
+    <section id="v-reg" hidden>
+      <div class="page-head">
+        <div><h2>سجل المخاطر</h2><p>جميع المخاطر المسجلة — اضغط على وصف الخطر لعرض التفاصيل</p></div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap" class="no-print">
+          <button class="sru-btn secondary" id="btnCsv"><i data-lucide="download"></i> تصدير CSV</button>
+          <button class="sru-btn secondary" onclick="window.print()"><i data-lucide="printer"></i> طباعة</button>
+          <button class="sru-btn" data-go="form"><i data-lucide="plus"></i> خطر جديد</button>
+        </div>
+      </div>
+      <div class="toolbar">
+        <div class="search"><i data-lucide="search"></i><input id="fq" type="search" placeholder="بحث في الوصف، الأثر، الإجراءات، المسؤول…"></div>
+        <select id="fPrio"><option value="">كل الأولويات</option></select>
+        <select id="fStatus"><option value="">كل الحالات</option></select>
+        <select id="fOwner"><option value="">كل المسؤولين</option></select>
+        <select id="fYear"><option value="">كل السنوات</option></select>
+      </div>
+      <div class="filter-note" id="cellNote" hidden></div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr id="thead"></tr></thead>
+          <tbody id="tbody"></tbody>
+        </table>
+      </div>
+      <div class="count-line" id="countLine"></div>
+    </section>
+
+    <!-- Form -->
+    <section id="v-form" hidden>
+      <div class="page-head">
+        <div><h2 id="formTitle">تسجيل خطر جديد</h2><p id="formSub">الحقول المعلَّمة بـ <span style="color:#b91c1c">*</span> مطلوبة. تُحسب الأولوية تلقائيًا من مصفوفة المخاطر.</p></div>
+      </div>
+      <form class="sru-card" id="riskForm" novalidate>
+        <div class="form-grid">
+          <div class="form-section full"><i data-lucide="file-text"></i> الملخص</div>
+          <div class="sru-field"><label>مقدم البلاغ</label><input id="fReporter" readonly></div>
+          <div class="sru-field"><label>البريد الإلكتروني</label><input id="fReporterEmail" readonly class="sru-en" style="text-align:right"></div>
+          <div class="sru-field"><label>تاريخ التسجيل</label><input id="fDate" type="date"></div>
+          <div class="sru-field"><label>المستلم</label><input id="fReceiver" list="dlReceivers" placeholder="اختر أو اكتب الاسم"><datalist id="dlReceivers"></datalist></div>
+
+          <div class="form-section full"><i data-lucide="alert-triangle"></i> الوصف والتقييم</div>
+          <div class="sru-field full"><label>وصف الخطر <span class="req">*</span></label><textarea id="fRisk" required></textarea></div>
+          <div class="sru-field full"><label>وصف الأثر</label><textarea id="fImpactDesc"></textarea></div>
+          <div class="sru-field"><label>تقييم الاحتمالية <span class="req">*</span></label><select id="fLikelihood" required></select></div>
+          <div class="sru-field"><label>تقييم الأثر <span class="req">*</span></label><select id="fImpact" required></select></div>
+          <div class="sru-field full"><label>تقييم الأولوية (محسوب)</label><div class="prio-box" id="prioBox"><span style="color:var(--sru-muted)">اختر الاحتمالية والأثر</span></div></div>
+
+          <div class="form-section full"><i data-lucide="shield-check"></i> الإجراءات الوقائية</div>
+          <div class="sru-field full"><label>الإجراءات الوقائية</label><textarea id="fPreventive"></textarea></div>
+          <div class="sru-field"><label>الإجراء (استراتيجية المعالجة)</label><select id="fTreatment"></select></div>
+          <div class="sru-field"><label>الحالة</label><select id="fStatus2"></select></div>
+
+          <div class="form-section full"><i data-lucide="siren"></i> إجراءات الطوارئ</div>
+          <div class="sru-field full"><label>إجراءات الطوارئ</label><textarea id="fContingency"></textarea></div>
+          <div class="sru-field"><label>مسؤول الإجراء <span class="req">*</span></label><select id="fOwnerSel" required></select>
+            <input id="fOwnerOther" placeholder="اكتب اسم المسؤول" style="margin-top:6px" hidden></div>
+          <div class="sru-field"><label>تاريخ المراجعة القادمة</label><input id="fReview" type="date"></div>
+        </div>
+        <div class="form-actions">
+          <button class="sru-btn" type="submit" id="btnSave"><i data-lucide="save"></i> <span>حفظ الخطر</span></button>
+          <button class="sru-btn secondary" type="button" id="btnCancel"><i data-lucide="x"></i> إلغاء</button>
+        </div>
+      </form>
+    </section>
+  </main>
+
+  <footer>
+    <div class="container">
+      <div>© جامعة سليمان الراجحي — الإدارة التنفيذية للاتصالات وتقنية المعلومات · سجل المخاطر <span class="sru-en">v1.1</span></div>
+      <a class="itoc" href="https://ictsru.github.io/ITOC/#forms" target="_blank" rel="noopener" title="ITOC Forms Hub">
+        <img src="https://ictsru.github.io/ICTD/risk-register/assets/itoc-logo.png" alt="ITOC" onerror="this.outerHTML='<span class=&quot;sru-en&quot;>ITOC · IT Operations Center</span>'">
+      </a>
+    </div>
+  </footer>
+</div>
+
+<div class="modal-bg" id="modal" hidden><div class="modal"><div class="modal-head"><h3 id="mTitle"></h3><button type="button" id="mClose" aria-label="إغلاق"><i data-lucide="x"></i></button></div><div class="modal-body" id="mBody"></div></div></div>
+<div class="banner" id="banner"></div>
+<div class="loader" id="loader" hidden><div class="spin"></div></div>
+
+<script>
+/* ═════════ Configuration ═════════ */
+const APP_VERSION = '1.1';
+const APP_URL   = 'https://script.google.com/a/macros/sr.edu.sa/s/AKfycby5E2RGOAn6vtxyLvuj3R0UZwFO94brbEtjuKijk8GL1FJLM4Re4hdGFB7EW183QGEI/exec';
+const DOMAIN    = 'sr.edu.sa';
+// Served by Apps Script (HtmlService): Google signs the user in before this page loads,
+// and the server identifies them with Session.getActiveUser() — no OAuth client ID needed.
+
+/* ═════════ Reference data (from the workbook's Risk Matrix sheet) ═════════ */
+const LEVELS = ['منخفض جداً','منخفض','متوسط','مرتفع','مرتفع جداً'];
+const MATRIX = {
+  'مرتفع جداً':['متوسط','مرتفع','مرتفع','مرتفع جداً','مرتفع جداً'],
+  'مرتفع':['متوسط','متوسط','مرتفع','مرتفع جداً','مرتفع جداً'],
+  'متوسط':['متوسط','متوسط','مرتفع','مرتفع','مرتفع جداً'],
+  'منخفض':['منخفض','متوسط','متوسط','مرتفع','مرتفع'],
+  'منخفض جداً':['منخفض جداً','منخفض','متوسط','مرتفع','مرتفع']
+};
+const PCLASS = {'منخفض جداً':'p-vlow','منخفض':'p-low','متوسط':'p-med','مرتفع':'p-high','مرتفع جداً':'p-vhigh'};
+const PCOLOR = {'منخفض جداً':['#fde68a','#713f12'],'منخفض':['#ca8a04','#fff'],'متوسط':['#ea580c','#fff'],'مرتفع':['#dc2626','#fff'],'مرتفع جداً':['#991b1b','#fff']};
+const TREATMENTS = ['التخفيف','القبول','التجنب','النقل'];
+const STATUSES = ['مفتوح','قيد المعالجة','تحت المراقبة','مغلق'];
+const SCLASS = {'مفتوح':'st-open','قيد المعالجة':'st-prog','تحت المراقبة':'st-watch','مغلق':'st-closed'};
+
+/* ═════════ State ═════════ */
+const S = { user:null, isAdmin:false, risks:[], lists:{owners:[],receivers:[]}, sort:{key:'id',dir:1}, cell:null, editing:null };
+const $ = id => document.getElementById(id);
+const esc = v => (v === null || v === undefined) ? '' : String(v).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const icons = () => window.lucide && lucide.createIcons();
+const yearOf = d => (String(d||'').match(/\d{4}/)||[''])[0];
+/* ═════════ API (google.script.run → api() in Code.gs) ═════════ */
+function gsRun(req){
+  return new Promise((resolve, reject) => {
+    if (!(window.google && google.script && google.script.run)) return reject(new Error('افتح السجل من رابط Google Apps Script الرسمي.'));
+    google.script.run.withSuccessHandler(resolve).withFailureHandler(e => reject(new Error((e && e.message) || String(e)))).api(JSON.stringify(req));
+  });
+}
+async function api(action, payload = {}) {
+  const req = Object.assign({ action }, payload);
+  let res = window.__MOCK_API ? await window.__MOCK_API(req) : await gsRun(req);
+  if (typeof res === 'string') res = JSON.parse(res);
+  if (!res.ok && res.error === 'unauthorized') { denied(res.email); throw new Error('unauthorized'); }
+  if (!res.ok) throw new Error(res.error || 'حدث خطأ غير متوقع');
+  return res;
+}
+function loading(on){ $('loader').hidden = !on; }
+let bannerT;
+function banner(msg, err){
+  const b = $('banner');
+  b.className = 'banner' + (err ? ' err' : '');
+  b.innerHTML = `<i data-lucide="${err ? 'alert-circle' : 'check-circle-2'}"></i><span>${esc(msg)}</span>`;
+  icons(); requestAnimationFrame(() => b.classList.add('show'));
+  clearTimeout(bannerT); bannerT = setTimeout(() => b.classList.remove('show'), err ? 5000 : 3500);
+}
+
+/* ═════════ Sign-in: Google has already authenticated the user; the server confirms @sr.edu.sa and logs it ═════════ */
+const SWITCH_URL = 'https://accounts.google.com/AccountChooser?continue=' + encodeURIComponent(APP_URL);
+function denied(email){
+  $('app').hidden = true; $('signin').hidden = false; $('siWait').hidden = true;
+  $('siErr').textContent = email ? `الحساب ${email} غير مصرح له. يُسمح فقط بحسابات الجامعة (@${DOMAIN}).` : `تعذر التحقق من الحساب. يُسمح فقط بحسابات الجامعة (@${DOMAIN}).`;
+  $('siSwitch').href = SWITCH_URL; $('siSwitch').hidden = false;
+}
+async function startSession(){
+  try {
+    const r = await api('signin');            // server reads Session.getActiveUser(), checks the domain, logs the sign-in
+    S.user = r.user; S.isAdmin = !!r.isAdmin;
+    enterApp();
+  } catch(e){
+    if (e.message !== 'unauthorized') { $('siWait').hidden = true; $('siErr').textContent = e.message; $('siSwitch').href = SWITCH_URL; $('siSwitch').hidden = false; }
+  }
+}
+async function enterApp(){
+  $('signin').hidden = true; $('app').hidden = false;
+  $('uName').textContent = S.user.name; $('uEmail').textContent = S.user.email;
+  $('uAvatar').textContent = (S.user.name || '?').trim().charAt(0).toUpperCase();
+  icons();
+  await loadRisks();
+}
+
+/* ═════════ Data ═════════ */
+async function loadRisks(){
+  try {
+    loading(true);
+    const r = await api('list');
+    S.risks = r.risks || []; S.lists = r.lists || {owners:[],receivers:[]}; S.isAdmin = !!r.isAdmin;
+    fillFilters(); renderAll();
+  } catch(e){ if (e.message !== 'unauthorized') banner(e.message, true); }
+  finally { loading(false); }
+}
+function owners(){ return [...new Set([...S.lists.owners, ...S.risks.map(r => r.owner)].map(x => String(x||'').trim()).filter(Boolean))].sort((a,b)=>a.localeCompare(b)); }
+function receivers(){ return [...new Set([...S.lists.receivers, ...S.risks.map(r => r.receiver)].map(x => String(x||'').trim()).filter(Boolean))].sort((a,b)=>a.localeCompare(b)); }
+const canEdit = r => S.isAdmin || (S.user && String(r.createdBy).toLowerCase() === S.user.email);
+
+/* ═════════ Rendering ═════════ */
+function renderAll(){ renderDash(); renderTable(); }
+
+function renderDash(){
+  const R = S.risks, cnt = p => R.filter(r => r.priority === p).length;
+  const open = R.filter(r => r.status !== 'مغلق').length;
+  const cards = [
+    ['layers','إجمالي المخاطر',R.length,'var(--sru-purple)'],
+    ['flame','مرتفع جداً',cnt('مرتفع جداً'),'var(--p-vhigh)'],
+    ['alert-triangle','مرتفع',cnt('مرتفع'),'var(--p-high)'],
+    ['gauge','متوسط فأقل',cnt('متوسط')+cnt('منخفض')+cnt('منخفض جداً'),'var(--p-med)'],
+    ['folder-open','مخاطر قائمة',open,'var(--sru-blue)'],
+    ['check-circle-2','مخاطر مغلقة',R.length-open,'#64748b']
+  ];
+  $('stats').innerHTML = cards.map(([ic,l,v,c]) => `<div class="stat" style="border-top-color:${c}"><div class="ic" style="color:${c}"><i data-lucide="${ic}"></i></div><div><b>${v}</b><span>${l}</span></div></div>`).join('');
+
+  // heat map: rows = likelihood (high → low), columns = impact (low → high)
+  let h = '<div class="lbl"></div>' + LEVELS.map(l => `<div class="lbl">${l}</div>`).join('');
+  [...LEVELS].reverse().forEach(lk => {
+    h += `<div class="lbl">${lk}</div>`;
+    LEVELS.forEach((im, i) => {
+      const p = MATRIX[lk][i], n = R.filter(r => r.likelihood === lk && r.impact === im).length, [bg, fg] = PCOLOR[p];
+      const sel = S.cell && S.cell.lk === lk && S.cell.im === im ? ' sel' : '';
+      h += `<div class="cell${n ? '' : ' zero'}${sel}" style="background:${bg};color:${fg}" title="الاحتمالية: ${lk} · الأثر: ${im} · الأولوية: ${p} · ${n} خطر" data-lk="${lk}" data-im="${im}">${n || '–'}</div>`;
+    });
+  });
+  $('heatmap').innerHTML = h;
+  $('heatmap').querySelectorAll('.cell').forEach(c => c.onclick = () => { S.cell = { lk:c.dataset.lk, im:c.dataset.im }; show('reg'); renderAll(); });
+  $('legend').innerHTML = LEVELS.map(l => `<span><i style="background:${PCOLOR[l][0]}"></i>${l}</span>`).join('');
+
+  bars('byOwner', group(R, r => r.owner || '—'));
+  bars('byStatus', group(R, r => r.status || '—'));
+  bars('byYear', group(R, r => yearOf(r.date) || 'غير محدد').sort((a,b) => String(a[0]).localeCompare(String(b[0]))), true);
+  icons();
+}
+function group(R, f){ const m = {}; R.forEach(r => { const k = f(r); m[k] = (m[k]||0) + 1; }); return Object.entries(m).sort((a,b) => b[1]-a[1]); }
+function bars(id, rows, keepOrder){
+  const max = Math.max(1, ...rows.map(r => r[1]));
+  $(id).innerHTML = rows.length ? rows.map(([k,v]) => `<div class="row"><span class="name" title="${esc(k)}">${esc(k)}</span><div class="track"><div class="fill" style="width:${(v/max*100).toFixed(1)}%"></div></div><b>${v}</b></div>`).join('') : '<div class="empty">لا توجد بيانات</div>';
+}
+
+const TCOLS = [
+  ['id','الرقم'],['risk','وصف الخطر'],['likelihood','الاحتمالية'],['impact','الأثر'],['priority','الأولوية'],
+  ['treatment','الإجراء'],['owner','مسؤول الإجراء'],['status','الحالة'],['date','تاريخ التسجيل'],['_acts','']
+];
+function filtered(){
+  const q = $('fq').value.trim().toLowerCase(), fp = $('fPrio').value, fs = $('fStatus').value, fo = $('fOwner').value, fy = $('fYear').value;
+  let R = S.risks.filter(r =>
+    (!q || ['id','risk','impactDesc','preventive','contingency','owner','reporter','receiver'].some(k => String(r[k]||'').toLowerCase().includes(q))) &&
+    (!fp || r.priority === fp) && (!fs || r.status === fs) && (!fo || r.owner === fo) && (!fy || yearOf(r.date) === fy) &&
+    (!S.cell || (r.likelihood === S.cell.lk && r.impact === S.cell.im)));
+  const { key, dir } = S.sort, lv = k => ['likelihood','impact','priority'].includes(k);
+  R.sort((a,b) => {
+    const A = lv(key) ? LEVELS.indexOf(a[key]) : String(a[key]||''), B = lv(key) ? LEVELS.indexOf(b[key]) : String(b[key]||'');
+    return (typeof A === 'number' ? A - B : A.localeCompare(B, 'ar', {numeric:true})) * dir;
+  });
+  return R;
+}
+function renderTable(){
+  $('thead').innerHTML = TCOLS.map(([k,l]) => k === '_acts' ? '<th class="nosort acts">إجراءات</th>' :
+    `<th data-k="${k}">${l}<span class="arr">${S.sort.key === k ? (S.sort.dir > 0 ? '▲' : '▼') : '↕'}</span></th>`).join('');
+  $('thead').querySelectorAll('th[data-k]').forEach(th => th.onclick = () => {
+    const k = th.dataset.k; S.sort = { key:k, dir: S.sort.key === k ? -S.sort.dir : (['priority','likelihood','impact'].includes(k) ? -1 : 1) }; renderTable();
+  });
+  const note = $('cellNote');
+  if (S.cell) { note.hidden = false; note.innerHTML = `<i data-lucide="filter"></i> تصفية المصفوفة: الاحتمالية «${esc(S.cell.lk)}» × الأثر «${esc(S.cell.im)}» <button type="button" id="clrCell">إلغاء التصفية</button>`; }
+  else note.hidden = true;
+  const R = filtered();
+  $('tbody').innerHTML = R.length ? R.map(r => `<tr>
+    <td class="id">${esc(r.id)}</td>
+    <td class="risk-cell"><div class="t" data-view="${esc(r.id)}">${esc(r.risk)}</div>${r.impactDesc ? `<div class="s">${esc(r.impactDesc)}</div>` : ''}</td>
+    <td class="lvl">${esc(r.likelihood)}</td><td class="lvl">${esc(r.impact)}</td>
+    <td><span class="badge ${PCLASS[r.priority]||''}">${esc(r.priority||'—')}</span></td>
+    <td>${esc(r.treatment||'—')}</td><td>${esc(r.owner||'—')}</td>
+    <td><span class="st ${SCLASS[r.status]||''}">${esc(r.status||'—')}</span></td>
+    <td style="white-space:nowrap">${esc(r.date||'—')}</td>
+    <td class="acts"><button class="icon-btn" title="عرض" data-view="${esc(r.id)}"><i data-lucide="eye"></i></button>
+      ${canEdit(r) ? `<button class="icon-btn" title="تعديل" data-edit="${esc(r.id)}"><i data-lucide="pencil"></i></button>
+      <button class="icon-btn del" title="حذف" data-del="${esc(r.id)}"><i data-lucide="trash-2"></i></button>` : ''}</td></tr>`).join('')
+    : `<tr><td colspan="${TCOLS.length}"><div class="empty"><i data-lucide="inbox"></i><div>لا توجد مخاطر مطابقة</div></div></td></tr>`;
+  $('countLine').textContent = `عرض ${R.length} من ${S.risks.length} خطر`;
+  icons();
+}
+function fillFilters(){
+  const keep = id => $(id).value;
+  const set = (id, first, vals) => { const v = keep(id); $(id).innerHTML = `<option value="">${first}</option>` + vals.map(x => `<option>${esc(x)}</option>`).join(''); $(id).value = vals.includes(v) ? v : ''; };
+  set('fPrio','كل الأولويات',[...LEVELS].reverse());
+  set('fStatus','كل الحالات',STATUSES);
+  set('fOwner','كل المسؤولين',owners());
+  set('fYear','كل السنوات',[...new Set(S.risks.map(r => yearOf(r.date)).filter(Boolean))].sort().reverse());
+  $('dlReceivers').innerHTML = receivers().map(x => `<option value="${esc(x)}">`).join('');
+}
+
+/* ═════════ Details modal ═════════ */
+function viewRisk(id){
+  const r = S.risks.find(x => x.id === id); if (!r) return;
+  const f = [['تاريخ التسجيل',r.date],['مقدم البلاغ',r.reporter + (r.reporterEmail ? ' — ' + r.reporterEmail : '')],['المستلم',r.receiver],['وصف الخطر',r.risk],['وصف الأثر',r.impactDesc],
+    ['تقييم الاحتمالية',r.likelihood],['تقييم الأثر',r.impact],['__p',r.priority],['الإجراءات الوقائية',r.preventive],['الإجراء',r.treatment],
+    ['إجراءات الطوارئ',r.contingency],['مسؤول الإجراء',r.owner],['__s',r.status],['تاريخ المراجعة القادمة',r.reviewDate],
+    ['أُنشئ',[r.createdBy, r.createdAt].filter(Boolean).join(' · ')],['آخر تعديل',[r.updatedBy, r.updatedAt].filter(Boolean).join(' · ')]];
+  $('mTitle').textContent = `${r.id} — تفاصيل الخطر`;
+  $('mBody').innerHTML = '<dl class="dl">' + f.map(([k,v]) =>
+    k === '__p' ? `<dt>تقييم الأولوية</dt><dd><span class="badge ${PCLASS[v]||''}">${esc(v||'—')}</span></dd>` :
+    k === '__s' ? `<dt>الحالة</dt><dd><span class="st ${SCLASS[v]||''}">${esc(v||'—')}</span></dd>` :
+    `<dt>${k}</dt><dd>${esc(v) || '—'}</dd>`).join('') + '</dl>' +
+    (canEdit(r) ? `<div class="form-actions"><button class="sru-btn" data-edit="${esc(r.id)}"><i data-lucide="pencil"></i> تعديل</button></div>` : '');
+  $('modal').hidden = false; icons();
+}
+
+/* ═════════ Form ═════════ */
+function opts(el, vals, ph){ el.innerHTML = (ph ? `<option value="">${ph}</option>` : '') + vals.map(v => `<option>${esc(v)}</option>`).join(''); }
+function fillOwnerSelect(cur){
+  const list = owners();
+  opts($('fOwnerSel'), list, '— اختر المسؤول —');
+  $('fOwnerSel').insertAdjacentHTML('beforeend', '<option value="__other">أخرى (حدد)</option>');
+  if (cur && !list.includes(cur)) { $('fOwnerSel').value = '__other'; $('fOwnerOther').hidden = false; $('fOwnerOther').value = cur; }
+  else { $('fOwnerSel').value = cur || ''; $('fOwnerOther').hidden = true; $('fOwnerOther').value = ''; }
+}
+function calcPrio(){
+  const lk = $('fLikelihood').value, im = $('fImpact').value;
+  if (!lk || !im) { $('prioBox').innerHTML = '<span style="color:var(--sru-muted)">اختر الاحتمالية والأثر</span>'; return ''; }
+  const p = MATRIX[lk][LEVELS.indexOf(im)];
+  $('prioBox').innerHTML = `<span class="badge ${PCLASS[p]}" style="font-size:14px;padding:4px 16px">${p}</span><span style="color:var(--sru-muted);font-size:12.5px">الاحتمالية «${lk}» × الأثر «${im}»</span>`;
+  return p;
+}
+function resetForm(r){
+  S.editing = r ? r.id : null;
+  $('formTitle').textContent = r ? `تعديل الخطر ${r.id}` : 'تسجيل خطر جديد';
+  $('btnSave').querySelector('span').textContent = r ? 'حفظ التعديلات' : 'حفظ الخطر';
+  opts($('fLikelihood'), LEVELS, '— اختر —'); opts($('fImpact'), LEVELS, '— اختر —');
+  opts($('fTreatment'), TREATMENTS); opts($('fStatus2'), STATUSES);
+  $('fReporter').value = r ? r.reporter : S.user.name;
+  $('fReporterEmail').value = r ? (r.reporterEmail || '') : S.user.email;
+  const iso = r && /^\d{4}-\d{2}-\d{2}$/.test(r.date) ? r.date : (r ? '' : new Date().toLocaleDateString('en-CA'));
+  $('fDate').value = iso; $('fDate').dataset.raw = r ? (r.date || '') : '';
+  $('fReceiver').value = r ? r.receiver : '';
+  $('fRisk').value = r ? r.risk : ''; $('fImpactDesc').value = r ? r.impactDesc : '';
+  $('fLikelihood').value = r ? r.likelihood : ''; $('fImpact').value = r ? r.impact : '';
+  $('fPreventive').value = r ? r.preventive : ''; $('fTreatment').value = r && r.treatment ? r.treatment : 'التخفيف';
+  $('fContingency').value = r ? r.contingency : ''; $('fStatus2').value = r && r.status ? r.status : 'مفتوح';
+  $('fReview').value = r && /^\d{4}-\d{2}-\d{2}$/.test(r.reviewDate) ? r.reviewDate : '';
+  fillOwnerSelect(r ? r.owner : '');
+  calcPrio();
+  document.querySelectorAll('.sru-field .err-msg').forEach(e => e.remove());
+}
+async function saveForm(e){
+  e.preventDefault();
+  const owner = $('fOwnerSel').value === '__other' ? $('fOwnerOther').value.trim() : $('fOwnerSel').value;
+  const missing = [];
+  if (!$('fRisk').value.trim()) missing.push('وصف الخطر');
+  if (!$('fLikelihood').value) missing.push('تقييم الاحتمالية');
+  if (!$('fImpact').value) missing.push('تقييم الأثر');
+  if (!owner) missing.push('مسؤول الإجراء');
+  if (missing.length) return banner('يرجى تعبئة: ' + missing.join('، '), true);
+  const risk = {
+    date: $('fDate').value || $('fDate').dataset.raw || '', receiver: $('fReceiver').value.trim(),
+    risk: $('fRisk').value.trim(), impactDesc: $('fImpactDesc').value.trim(),
+    likelihood: $('fLikelihood').value, impact: $('fImpact').value,
+    preventive: $('fPreventive').value.trim(), treatment: $('fTreatment').value,
+    contingency: $('fContingency').value.trim(), owner, status: $('fStatus2').value, reviewDate: $('fReview').value
+  };
+  const btn = $('btnSave'); btn.disabled = true;
+  try {
+    loading(true);
+    if (S.editing) {
+      const r = await api('update', { id: S.editing, risk });
+      S.risks = S.risks.map(x => x.id === S.editing ? r.risk : x);
+      banner(`تم تحديث الخطر ${S.editing} بنجاح`);
+    } else {
+      const r = await api('add', { risk });
+      S.risks.push(r.risk);
+      banner(`تم تسجيل الخطر ${r.risk.id} بنجاح`);
+    }
+    fillFilters(); renderAll(); resetForm(null); show('reg');
+  } catch(err){ if (err.message !== 'unauthorized') banner(err.message, true); }
+  finally { btn.disabled = false; loading(false); }
+}
+async function delRisk(id){
+  const r = S.risks.find(x => x.id === id); if (!r) return;
+  $('mTitle').textContent = `حذف الخطر ${id}`;
+  $('mBody').innerHTML = `<p>هل أنت متأكد من حذف الخطر التالي؟ لا يمكن التراجع عن هذه العملية (تُحفظ العملية في سجل التدقيق).</p><p style="font-weight:800">${esc(r.risk)}</p>
+    <div class="form-actions"><button class="sru-btn danger" id="cDel"><i data-lucide="trash-2"></i> تأكيد الحذف</button><button class="sru-btn secondary" id="cCancel">إلغاء</button></div>`;
+  $('modal').hidden = false; icons();
+  $('cCancel').onclick = () => $('modal').hidden = true;
+  $('cDel').onclick = async () => {
+    $('modal').hidden = true;
+    try { loading(true); await api('delete', { id }); S.risks = S.risks.filter(x => x.id !== id); fillFilters(); renderAll(); banner(`تم حذف الخطر ${id}`); }
+    catch(e){ if (e.message !== 'unauthorized') banner(e.message, true); }
+    finally { loading(false); }
+  };
+}
+
+/* ═════════ CSV export ═════════ */
+function exportCsv(){
+  const cols = [['id','الرقم'],['date','تاريخ التسجيل'],['reporter','مقدم البلاغ'],['receiver','المستلم'],['risk','وصف الخطر'],['impactDesc','وصف الأثر'],['likelihood','تقييم الاحتمالية'],['impact','تقييم الأثر'],['priority','تقييم الأولوية'],['preventive','الإجراءات الوقائية'],['treatment','الإجراء'],['contingency','إجراءات الطوارئ'],['owner','مسؤول الإجراء'],['status','الحالة'],['reviewDate','تاريخ المراجعة القادمة']];
+  const q = v => '"' + String(v == null ? '' : v).replace(/"/g, '""') + '"';
+  const csv = '﻿' + [cols.map(c => q(c[1])).join(',')].concat(filtered().map(r => cols.map(c => q(r[c[0]])).join(','))).join('\r\n');
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(new Blob([csv], { type:'text/csv;charset=utf-8' }));
+  a.download = `ICTD_Risk_Register_${new Date().toLocaleDateString('en-CA')}.csv`; a.click();
+  setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+}
+
+/* ═════════ Navigation & events ═════════ */
+function show(v){
+  ['dash','reg','form'].forEach(x => $('v-' + x).hidden = x !== v);
+  document.querySelectorAll('.sru-nav-item').forEach(b => b.classList.toggle('active', b.dataset.view === v));
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+document.addEventListener('click', e => {
+  const t = e.target.closest('[data-view],[data-edit],[data-del],[data-go],#clrCell');
+  if (!t) return;
+  if (t.id === 'clrCell') { S.cell = null; renderAll(); return; }
+  if (t.classList.contains('sru-nav-item')) {
+    if (t.dataset.view === 'form' && !S.editing) resetForm(null);
+    show(t.dataset.view); return;
+  }
+  if (t.dataset.go) { resetForm(null); show(t.dataset.go); return; }
+  if (t.dataset.view) return viewRisk(t.dataset.view);
+  if (t.dataset.edit) { $('modal').hidden = true; resetForm(S.risks.find(x => x.id === t.dataset.edit)); show('form'); return; }
+  if (t.dataset.del) return delRisk(t.dataset.del);
+});
+['fq','fPrio','fStatus','fOwner','fYear'].forEach(id => $(id).addEventListener('input', renderTable));
+$('fLikelihood').onchange = calcPrio; $('fImpact').onchange = calcPrio;
+$('fOwnerSel').onchange = () => { const o = $('fOwnerSel').value === '__other'; $('fOwnerOther').hidden = !o; if (o) $('fOwnerOther').focus(); };
+$('riskForm').onsubmit = saveForm;
+$('btnCancel').onclick = () => { resetForm(null); show('reg'); };
+$('btnOut').onclick = () => { window.top.location.href = SWITCH_URL; };
+$('btnRefresh').onclick = loadRisks;
+$('btnCsv').onclick = exportCsv;
+$('mClose').onclick = () => $('modal').hidden = true;
+$('modal').onclick = e => { if (e.target.id === 'modal') $('modal').hidden = true; };
+document.addEventListener('keydown', e => { if (e.key === 'Escape') $('modal').hidden = true; });
+
+icons();
+startSession();
+</script>
+</body>
+</html>
