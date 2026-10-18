@@ -1,7 +1,7 @@
 /**
  * ICTD Risk Register — Google Apps Script back end
  * سجل المخاطر — الإدارة التنفيذية للاتصالات وتقنية المعلومات
- * Version: 1.1  (2026-10-18)
+ * Version: 1.3  (2026-10-18)
  *
  * This script both SERVES the register page (Index.html) and stores the data.
  *   Sheet → Extensions → Apps Script
@@ -18,7 +18,8 @@
  */
 
 const CONFIG = {
-  VERSION: '1.1',
+  VERSION: '1.3',
+  SPREADSHEET_ID: '110jrIGTFvsEVQ8pJH0oXLtwfejDKDSLHEdT_kzF2LlY', // fallback if the script is not bound to the sheet
   DOMAIN: 'sr.edu.sa',
   TZ: 'Asia/Riyadh',
   // Admins may edit/delete any risk. Other SRU users may add risks and edit/delete their own.
@@ -53,10 +54,28 @@ const MATRIX = {
 const TREATMENTS = ['التخفيف', 'القبول', 'التجنب', 'النقل'];
 const STATUSES = ['مفتوح', 'قيد المعالجة', 'تحت المراقبة', 'مغلق'];
 
+/* ───────────────────────── spreadsheet access + self-setup ───────────────────────── */
+
+function ss_() {
+  let ss = null;
+  try { ss = SpreadsheetApp.getActiveSpreadsheet(); } catch (e) {}
+  return ss || SpreadsheetApp.openById(CONFIG.SPREADSHEET_ID);
+}
+
+/** Creates any missing tab (and seeds the 44 risks) automatically — no need to run setup() by hand. */
+function ensureSetup_() {
+  const ss = ss_();
+  const need = [CONFIG.SHEET_RISKS, CONFIG.SHEET_SIGNINS, CONFIG.SHEET_AUDIT, CONFIG.SHEET_LISTS]
+    .some(n => !ss.getSheetByName(n));
+  if (!need) return;
+  const lock = LockService.getScriptLock(); lock.waitLock(30000);
+  try { setup(); } finally { lock.releaseLock(); }
+}
+
 /* ───────────────────────── setup ───────────────────────── */
 
 function setup() {
-  const ss = SpreadsheetApp.getActiveSpreadsheet();
+  const ss = ss_();
   ss.setSpreadsheetTimeZone(CONFIG.TZ);
 
   // If the sheet was created from the seed CSV, its first tab already holds the risks.
@@ -118,6 +137,7 @@ function api(reqJson) {
   const user = currentUser_();
   if (!user.ok) return JSON.stringify({ ok: false, error: 'unauthorized', email: user.email });
   try {
+    ensureSetup_();
     let out;
     switch (req.action) {
       case 'signin': logSignIn_(user); out = { ok: true, user: { email: user.email, name: user.name }, isAdmin: isAdmin_(user.email) }; break;
@@ -154,21 +174,21 @@ function isAdmin_(email) { return CONFIG.ADMINS.map(a => a.toLowerCase()).indexO
 
 function logSignIn_(user) {
   const now = new Date();
-  SpreadsheetApp.getActiveSpreadsheet().getSheetByName(CONFIG.SHEET_SIGNINS).appendRow([
+  ss_().getSheetByName(CONFIG.SHEET_SIGNINS).appendRow([
     user.email, user.name,
     Utilities.formatDate(now, CONFIG.TZ, 'yyyy-MM-dd'),
     Utilities.formatDate(now, CONFIG.TZ, 'HH:mm:ss')
   ]);
 }
 function audit_(user, action, id, details) {
-  SpreadsheetApp.getActiveSpreadsheet().getSheetByName(CONFIG.SHEET_AUDIT).appendRow([
+  ss_().getSheetByName(CONFIG.SHEET_AUDIT).appendRow([
     Utilities.formatDate(new Date(), CONFIG.TZ, 'yyyy-MM-dd HH:mm:ss'), user.email, action, id || '', details || ''
   ]);
 }
 
 /* ───────────────────────── data ───────────────────────── */
 
-function sheet_() { return SpreadsheetApp.getActiveSpreadsheet().getSheetByName(CONFIG.SHEET_RISKS); }
+function sheet_() { return ss_().getSheetByName(CONFIG.SHEET_RISKS); }
 
 function readRisks_() {
   const sh = sheet_(), n = sh.getLastRow() - 1;
@@ -178,7 +198,7 @@ function readRisks_() {
     .map(r => { const o = {}; KEYS.forEach((k, i) => o[k] = r[i]); return o; });
 }
 function readLists_() {
-  const sh = SpreadsheetApp.getActiveSpreadsheet().getSheetByName(CONFIG.SHEET_LISTS);
+  const sh = ss_().getSheetByName(CONFIG.SHEET_LISTS);
   if (!sh || sh.getLastRow() < 2) return { owners: [], receivers: [] };
   const v = sh.getRange(2, 1, sh.getLastRow() - 1, 2).getDisplayValues();
   return { owners: uniq_(v.map(r => r[0])), receivers: uniq_(v.map(r => r[1])) };

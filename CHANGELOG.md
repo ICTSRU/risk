@@ -1,5 +1,15 @@
 # CHANGELOG — ICTD Risk Register (سجل المخاطر)
 
+## v1.3 — 2026-10-18
+- Official logos (SRU, ICTD, ITOC) embedded directly in Index.html and the GitHub sign-in page — no external hosting needed.
+- Header band: SRU logo right, ICTD logo left; ITOC logo on the sign-in card and at the footer bottom-left (linked to the ITOC forms hub).
+- GitHub sign-in page now shows the SRU + ICTD logos above the ITOC mark.
+
+## v1.2 — 2026-10-18
+- Fixed "Cannot read properties of null (reading 'appendRow')" at sign-in: the SignIns tab did not exist because setup() had not been run.
+- Self-setup: on the first call the script creates any missing tab (Risks, SignIns, Audit, Lists) and seeds the 44 risks automatically.
+- Spreadsheet fallback: if the script is not bound to the sheet, it opens it by ID (110jrIGT…).
+
 ## v1.1 — 2026-10-18
 - Fixed "Access blocked: Authorization Error (400 invalid_request)": removed client-side Google Sign-In (OAuth client ID / JavaScript origins) entirely.
 - The register now runs from Apps Script (HtmlService) at the domain-only /exec URL; Google signs users in before the page loads.
