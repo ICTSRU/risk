@@ -1,5 +1,17 @@
 # CHANGELOG — ICTD Risk Register (سجل المخاطر)
 
+## v1.4 — 2026-10-18
+- Applied **SRU Secure Access Kit v1.4**:
+  - Access check in `doGet` (domain + `AllowedUsers` list, `ACCESS_MODE = 'LIST'`); `requireSruUser_()` on every `api()` call.
+  - `Denied.html` for non-SRU / not-listed accounts; logged as مرفوض / غير مدرج.
+  - `AccessLog` (timestamp, date, time, day, email, result, version; 30-min de-dup) replaces the earlier `SignIns` tab.
+  - `Logos.html` (shared SRU/ICTD/ITOC logos) replaces the logos embedded in Index; Index is now an HtmlService template.
+  - Sheet menu: register setup, access list setup, 30-day summary, purge old logs, show URL.
+  - GitHub landing replaced with the kit's standard page (CONFIG filled; "skip this screen" option).
+- Admin role now comes from `AllowedUsers` (role = admin) + `OWNER_EMAILS` instead of a hard-coded list; names come from the `name` column.
+- Risks are rendered into the page on load (no extra round trip).
+- First visit also creates `AllowedUsers` (owner + 13 ICTD accounts from `DEFAULT_ALLOWED`).
+
 ## v1.3 — 2026-10-18
 - Official logos (SRU, ICTD, ITOC) embedded directly in Index.html and the GitHub sign-in page — no external hosting needed.
 - Header band: SRU logo right, ICTD logo left; ITOC logo on the sign-in card and at the footer bottom-left (linked to the ITOC forms hub).
